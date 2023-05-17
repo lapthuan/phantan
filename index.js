@@ -9,7 +9,7 @@ const morgan = require("morgan");
 const cors = require("cors");
 const session = require("express-session");
 const mysql = require('mysql');
-const { default: mongoose } = require("mongoose");
+const { default: mongoose, Error } = require("mongoose");
 
 const Category = require("./models/prodcategoryModel")
 const Product = require("./models/productModel")
@@ -102,130 +102,107 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
   const sql = `SELECT * FROM phantan.connectmongodb where id = ${idconnect}`;
   mongoose.disconnect()
-  connection.query(sql, function (err, rows) {
-    if (err) {
-      console.error('Error executing SELECT query:', err);
-      return;
-    }
+  try {
+    connection.query(sql, function (err, rows) {
+      if (err) {
+        console.error('Error executing SELECT query:', err);
+        return;
+      }
+      let msgs;
+      mongoose.connect(rows[0].url).then(() => {
 
-    mongoose.connect(rows[0].url).then(() => {
+        const sql2 = `SELECT * FROM luxubu.${table} where ${condition} = "${value}"`;
 
-      const sql2 = `SELECT * FROM luxubu.${table} where ${condition} = "${value}"`;
-      connection.query(sql2, function (err, rows) {
-        if (err) {
-          console.error('Error executing SELECT query:', err);
-          return;
-        }
-
-        if (table == "product") {
-
-          const products = rows.map(productData => {
-            const product = { ...productData };
-            delete product.RowDataPacket;
-            return product;
-          });
+        connection.query(sql2, function (err, rows) {
 
 
-          products.map((item) => {
+          if (table == "product") {
 
-
-            let data = {
-
-              title: item.title,
-              slug: item.slug,
-              description: item.description,
-              price: item.price,
-              category: item.category,
-              brand: item.brand,
-              quantity: item.quantity,
-              sold: item.sold,
-              images: JSON.parse(item.images),
-              imagesDetail: JSON.parse(item.imagesDetail)
-
-            }
-
-            Product.insertMany(data, function (err, product) {
-              if (err) {
-                res.json({ msg: 'data already exists:', err })
-                return;
-              }
-              res.json({ msg: "distributed success" })
-
+            const products = rows.map(productData => {
+              const product = { ...productData };
+              delete product.RowDataPacket;
+              return product;
             });
 
-          })
+            products.map((item) => {
+              let data = {
+                title: item.title,
+                slug: item.slug,
+                description: item.description,
+                price: item.price,
+                category: item.category,
+                brand: item.brand,
+                quantity: item.quantity,
+                sold: item.sold,
+                images: JSON.parse(item.images),
+                imagesDetail: JSON.parse(item.imagesDetail)
+              }
 
-        } else if (table == "category") {
-
-          const formattedArray = rows.map(row => {
-
-            return {
-              id: row.id,
-              title: row.title
-            };
+              Product.insertMany(data)
 
 
-          })[0];
-          Category.insertMany(formattedArray, function (err, category) {
-            if (err) {
-              // res.json(err)
-              res.json({ msg: 'data already exists:', err })
-
-              return;
-            }
-
+            })
             res.json({ msg: "distributed success" })
-          });
 
+          } else if (table == "category") {
 
-        } else if (table == "user") {
-          const users = rows.map(UserData => {
-            const user = { ...UserData };
-            delete user.RowDataPacket;
-            return user;
-          });
+            const formattedArray = rows.map(row => {
 
-          users.map((item) => {
-            let data = {
-              firstname: item.firstname,
-              lastname: item.lastname,
-              email: item.email,
-              facebookId: item.facebookId,
-              googleId: item.googleId,
-              mobile: item.mobile,
-              password: item.password,
-              role: item.role,
-              isBlocked: item.isBlocked,
-              address: item.address
+              return {
+                id: row.id,
+                title: row.title
+              };
 
-            }
+            })[0];
 
-            User.insertMany(data, function (err, data) {
-              if (err) {
-                res.json({ msg: 'data already exists:', err })
-                return;
+            Category.insertMany(formattedArray);
+            res.json({ msg: "distributed success" })
+
+          } else if (table == "user") {
+
+            const users = rows.map(UserData => {
+              const user = { ...UserData };
+              delete user.RowDataPacket;
+              return user;
+            });
+
+            users.map((item) => {
+              let data = {
+                firstname: item.firstname,
+                lastname: item.lastname,
+                email: item.email,
+                facebookId: item.facebookId,
+                googleId: item.googleId,
+                mobile: item.mobile,
+                password: item.password,
+                role: item.role,
+                isBlocked: item.isBlocked,
+                address: item.address
+
               }
 
-              res.json({ msg: "distributed success" })
+              User.insertMany(data);
+            })
+            res.json({ msg: "distributed success" })
+          }
 
-            });
-          })
-
-        }
-
-
+        });
 
 
+      })
 
-      });
     })
 
-  })
+
+  } catch (error) {
+
+  }
+
 
 });
 
 app.use(notFound);
 app.use(errorHandler);
 app.listen(PORT, () => {
-  console.log(`Server is running  at PORT ${PORT}`);
+  console.log(`Server is running at PORT ${PORT}`);
 });
