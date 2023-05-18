@@ -10,7 +10,10 @@ const cors = require("cors");
 const session = require("express-session");
 const mysql = require('mysql');
 const { default: mongoose, Error } = require("mongoose");
+const { Client } = require('pg');
+const fs = require('fs');
 
+const Brand = require("./models/brandModel")
 const Category = require("./models/prodcategoryModel")
 const Product = require("./models/productModel")
 const User = require("./models/userModel")
@@ -97,6 +100,39 @@ app.post("/api/connectmongodb", (req, res) => {
 
 });
 
+app.post("/api/connectyugadb", async (req, res) => {
+  const { host, port, database, user, password } = req.body
+
+  const config = {
+    host: host,
+    port: port,
+    database: database,
+    user: user,
+    password: password,
+    ssl: {
+      rejectUnauthorized: true,
+      ca: fs.readFileSync('./root.crt').toString()
+    },
+    connectionTimeoutMillis: 5000
+  };
+  var client;
+  try {
+    client = new pg.Client(config);
+
+    await client.connect();
+
+    console.log('>>>> Connected to YugabyteDB!');
+
+
+  } catch (err) {
+    console.log('>>>> Connected to YugabyteDB loss!');
+
+  }
+});
+
+
+
+
 app.post("/api/distributed-mongodb", (req, res) => {
   const { idconnect, table, value, condition } = req.body
 
@@ -142,6 +178,20 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
 
             })
+            res.json({ msg: "distributed success" })
+
+          } else if (table == "brand") {
+
+            const formattedArray = rows.map(row => {
+
+              return {
+                id: row.id,
+                title: row.title
+              };
+
+            })[0];
+
+            Brand.insertMany(formattedArray);
             res.json({ msg: "distributed success" })
 
           } else if (table == "category") {
@@ -195,7 +245,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
 
   } catch (error) {
-
+    throw new Error(error)
   }
 
 

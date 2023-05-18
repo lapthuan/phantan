@@ -34,9 +34,11 @@
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",
     "passport-google-oauth20": "^2.0.0",
+    "pg": "^8.11.0",
     "sharp": "^0.31.2",
     "slugify": "^1.6.5",
-    "uniqid": "^5.4.0"
+    "uniqid": "^5.4.0",
+    "yugabyte": "^1.0.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
