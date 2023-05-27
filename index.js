@@ -111,14 +111,15 @@ app.post("/api/distributed-mongodb", (req, res) => {
         console.error('Error executing SELECT query:', err);
         return;
       }
-
+      console.log(region);
       mongoose.connect(rows[0].url).then(async () => {
         await connection.query(`SELECT * FROM luxubu.region WHERE name='${region}'`, async (err, results) => {
           if (err) {
             console.error('Lỗi truy vấn:', err);
             return;
           }
-          if (results == undefined) {
+  
+          if (results != undefined) {
             console.log("ID khu vực : " + results[0].id);
             let arrUsers = []
 
