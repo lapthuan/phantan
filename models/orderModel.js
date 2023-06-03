@@ -1,36 +1,41 @@
 const mongoose = require("mongoose"); // Erase if already required
-
+const { CART_ITEM_STATUS } = require("../constants");
 // Declare the Schema of the Mongo model
 var orderSchema = new mongoose.Schema(
   {
-    id: {
-      type: Number,
-      required: true,
-      unique: true,
-    },
     products: [
       {
         product: {
-          type: Number,
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
         },
-        count: Number,
+        qty: Number,
       },
     ],
     paymentIntent: {},
+    shippingMethor: {},
     orderStatus: {
       type: String,
-      default: "Not Processed",
+      default: CART_ITEM_STATUS.Processing,
       enum: [
-        "Not Processed",
-        "Cash on Delivery",
-        "Processing",
-        "Dispatched",
-        "Cancelled",
-        "Delivered",
+        CART_ITEM_STATUS.Processing,
+        CART_ITEM_STATUS.Shipped,
+        CART_ITEM_STATUS.Delivered,
+        CART_ITEM_STATUS.Cancelled,
+        CART_ITEM_STATUS.Not_processed,
       ],
     },
+    totalPrice: {
+      type: Number,
+    },
     orderby: {
-      type: Number
+      type: mongoose.Schema.Types.ObjectId,
+    },
+    nameUserOrder: {
+      type: String,
+    },
+    messageCancel: {
+      type: String,
     },
   },
   {

@@ -3,8 +3,8 @@ const mongoose = require("mongoose"); // Erase if already required
 // Declare the Schema of the Mongo model
 var productSchema = new mongoose.Schema(
   {
-    id: {
-      type: Number, 
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       unique: true,
     },
@@ -49,12 +49,6 @@ var productSchema = new mongoose.Schema(
         url: String,
       },
     ],
-    imagesDetail: [
-      {
-        public_id: String,
-        url: String,
-      },
-    ],
     color: [],
     tags: String,
     ratings: [
@@ -68,7 +62,6 @@ var productSchema = new mongoose.Schema(
       type: String,
       default: 0,
     },
-
   },
   { timestamps: true }
 );

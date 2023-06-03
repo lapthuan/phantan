@@ -12,8 +12,8 @@ var blogSchema = new mongoose.Schema(
       required: true,
     },
     category: {
-      type: String,
-      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BCategory",
     },
     numViews: {
       type: Number,
@@ -45,6 +45,11 @@ var blogSchema = new mongoose.Schema(
       default: "Admin",
     },
     images: [],
+    updated: Date,
+    created: {
+      type: Date,
+      default: Date.now,
+    }
   },
   {
     toJSON: {
@@ -53,7 +58,7 @@ var blogSchema = new mongoose.Schema(
     toObject: {
       virtuals: true,
     },
-    timestamps: true,
+   
   }
 );
 

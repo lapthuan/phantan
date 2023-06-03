@@ -3,8 +3,8 @@ const mongoose = require("mongoose"); // Erase if already required
 // Declare the Schema of the Mongo model
 var prodcategorySchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
       unique: true,
     },

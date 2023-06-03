@@ -4,9 +4,10 @@ const crypto = require("crypto");
 // Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema(
   {
-    id: {
-      type: String,
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
       required: true,
+      unique: true,
     },
     firstname: {
       type: String,
@@ -19,13 +20,17 @@ var userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: false,
-      unique: true,
+      // unique: true,
     },
     facebookId: {
       type: String,
+      unique: true,
+      sparse: true,
     },
     googleId: {
       type: String,
+      unique: true,
+      sparse: true,
     },
     mobile: {
       type: String,
@@ -51,9 +56,36 @@ var userSchema = new mongoose.Schema(
     address: {
       type: String,
     },
+    avatar: {
+      public_id: String,
+      url: String,
+    },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
     refreshToken: {
       type: String,
+    },
+    address:
+    {
+      city: {
+        type: Number,
+      },
+      district: {
+        type: Number,
+      },
+      ward: {
+        type: Number,
+      },
+      address: {
+        type: String,
+      }
+
+    },
+    profilePicture: {
+      type: String,
+    },
+    Introduce: {
+      type: String,
+      default: "false",
     },
     passwordChangedAt: Date,
     passwordResetToken: String,
