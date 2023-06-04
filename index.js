@@ -19,6 +19,9 @@ const Product = require("./models/productModel")
 const User = require("./models/userModel")
 const Order = require("./models/orderModel")
 const Review = require("./models/review")
+const BlogCat = require("./models/blogCatModel")
+const Blog = require("./models/blogModel");
+const contactModel = require("./models/contactModel");
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
@@ -103,21 +106,229 @@ app.post("/api/connectmongodb", (req, res) => {
 app.post("/api/distributed-mongodb", (req, res) => {
   const { ConnectMongodb, colums, value } = req.body
 
-
+  mongoose.disconnect()
   mongoose.connect(ConnectMongodb).then(async () => {
     await connection.query(`SHOW COLUMNS FROM luxubu.provinces LIKE '${colums}'`, async (error, results) => {
 
       const columnExists = results.length > 0;
+      //Kiểm tra có column đó không
       if (columnExists) {
+
         await connection.query(`SELECT * FROM luxubu.provinces WHERE ${colums} like '%${value}'`, async (err, results) => {
-          if (err) {
-            console.error('Lỗi truy vấn:', err);
-            return;
-          }
-          console.log(results);
+
           if (results.length != 0) {
+
             console.log("ID tỉnh : " + results[0].id);
-            let arrUsers = []
+            let arrUsers = [];
+
+            // Để kiểm tra có dữ liệu tỉnh đó không trước khi thêm dữ liệu 
+            setTimeout(() => {
+
+              if (arrUsers.length == 0) {
+                res.json({ message: `Không có dữ liệu tỉnh này ${value}` });
+              } else {
+                connection.query(`SELECT * FROM luxubu.categories `, (err, results) => {
+                  const categorys = results.map(categoryData => {
+                    const category = { ...categoryData };
+                    delete category.RowDataPacket;
+                    return category;
+                  });
+                  categorys.map((item) => {
+                    let data = {
+                      _id: item.id,
+                      title: item.title
+                    }
+                    Category.findOne({ id: item.id }, function (err, cate) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (cate) {
+                          console.log('Category đã tồn tại');
+                        } else {
+                          Category.insertMany(data)
+                        }
+                      }
+                    });
+
+                  })
+
+
+                });
+                connection.query(`SELECT * FROM luxubu.brands `, (err, results) => {
+                  const brands = results.map(brandData => {
+                    const brand = { ...brandData };
+                    delete brand.RowDataPacket;
+                    return brand;
+                  });
+
+                  brands.map((item) => {
+                    let data = {
+                      _id: item.id,
+                      title: item.title
+                    }
+
+                    Brand.findOne({ id: item.id }, function (err, br) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (br) {
+                          console.log('Brand đã tồn tại');
+                        } else {
+                          Brand.insertMany(data)
+                        }
+                      }
+                    });
+
+                  })
+
+
+                });
+                connection.query('SELECT * FROM luxubu.images JOIN luxubu.products  ON images.product_id = products.id', (error, results, fields) => {
+                  if (error) throw error;
+
+                  const products = {};
+
+                  results.forEach(row => {
+                    const { id, url, title, slug, description, price, category_id, brand_id, quantity, sold, public_id } = row;
+
+                    if (!products[id]) {
+                      products[id] = {
+                        _id: id,
+                        title: title,
+                        slug: slug,
+                        description: description,
+                        price: price,
+                        category: category_id,
+                        brand: brand_id,
+                        quantity: quantity,
+                        sold: sold,
+                        images: []
+                      };
+                    }
+
+                    products[id].images.push({
+                      public_id: public_id,
+                      url: url
+                    });
+                  });
+
+                  const jsonResult = Object.values(products);
+
+                  jsonResult.map((item) => {
+
+                    Product.findOne({ id: item.id }, function (err, pr) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (pr) {
+                          console.log('Sản phẩm đã tồn tại');
+                        } else {
+                          Product.insertMany(item)
+                        }
+                      }
+                    });
+
+                  })
+
+                });
+                connection.query(`SELECT * FROM luxubu.cateblog `, (err, results) => {
+                  const cateblogs = results.map(cateblogsData => {
+                    const cateblog = { ...cateblogsData };
+                    delete cateblog.RowDataPacket;
+                    return cateblog;
+                  });
+
+                  cateblogs.map((item) => {
+                    let data = {
+                      _id: item.id,
+                      title: item.name
+                    }
+
+                    BlogCat.findOne({ id: item.id }, function (err, br) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (br) {
+                          console.log('BlogCategory đã tồn tại');
+                        } else {
+                          BlogCat.insertMany(data)
+                        }
+                      }
+                    });
+
+                  })
+
+
+                });
+                connection.query(`SELECT * FROM luxubu.blog `, (err, results) => {
+                  const blogs = results.map(blogsData => {
+                    const blog = { ...blogsData };
+                    delete blog.RowDataPacket;
+                    return blog;
+                  });
+
+                  blogs.map((item) => {
+                    let data = {
+                      _id: item.id,
+                      title: item.title,
+                      description: item.description,
+                      category: item.idcateblog,
+                      images: JSON.parse(item.images)
+                    }
+
+                    Blog.findOne({ id: item.id }, function (err, br) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (br) {
+                          console.log('blog đã tồn tại');
+                        } else {
+                          Blog.insertMany(data)
+                        }
+                      }
+                    });
+
+                  })
+
+
+                });
+                connection.query(`SELECT * FROM luxubu.contacts `, (err, results) => {
+                  const contacts = results.map(contactData => {
+                    const contact = { ...contactData };
+                    delete contact.RowDataPacket;
+                    return contact;
+                  });
+
+                  contacts.map((item) => {
+                    let data = {
+                      _id: item.id,
+                      name: item.name,
+                      email: item.email,
+                      phone: item.phone,
+                      message: item.message
+                    }
+
+                    contactModel.findOne({ _id: item.id }, function (err, br) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (br) {
+                          console.log('contact đã tồn tại');
+                        } else {
+                          contactModel.insertMany(data)
+                        }
+                      }
+                    });
+
+                  })
+
+
+                });
+
+                res.json({ message: `Phân tán thành công khu vực ${value}` })
+
+              }
+            }, 4000);
 
             await connection.query(`SELECT * FROM luxubu.users WHERE idprovinces = ${results[0].id}`, async (err, results1) => {
 
@@ -156,119 +367,99 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
 
               })
+              await connection.query(`SELECT order.id , order.orderStatus,order.totalPrice,order.orderby,orderdetail.productid,orderdetail.quantity,order.paymentid,payments.method_name
+              FROM luxubu.orderdetail 
+              JOIN luxubu.order ON orderdetail.orderid = order.id 
+              JOIN luxubu.users ON users.id = order.orderby 
+              JOIN luxubu.payments ON payments.id = order.paymentid 
+              JOIN luxubu.products ON products.id = orderdetail.productid 
+              WHERE order.orderby in ('${arrUsers.join('\', \'')}')`, (error, results, fields) => {
 
-              console.log(arrUsers);
-            });
-            await connection.query(`SELECT * FROM luxubu.categories `, (err, results) => {
-              const categorys = results.map(categoryData => {
-                const category = { ...categoryData };
-                delete category.RowDataPacket;
-                return category;
-              });
-              categorys.map((item) => {
-                let data = {
-                  _id: item.id,
-                  title: item.title
-                }
-                Category.findOne({ id: item.id }, function (err, cate) {
-                  if (err) {
-                    console.error('Lỗi tìm kiếm người dùng:', err);
-                  } else {
-                    if (cate) {
-                      console.log('Category đã tồn tại');
-                    } else {
-                      Category.insertMany(data)
-                    }
+                const orders = {};
+
+                results?.forEach(row => {
+                  if (!orders[row.id]) {
+                    orders[row.id] = {
+                      _id: row.id,
+                      products: [],
+                      paymentIntent: {},
+                      orderStatus: row.orderStatus,
+                      totalPrice: row.totalPrice,
+                      orderby: row.orderby,
+                    };
                   }
-                });
 
-              })
-
-
-            });
-            await connection.query(`SELECT * FROM luxubu.brands `, (err, results) => {
-              const brands = results.map(brandData => {
-                const brand = { ...brandData };
-                delete brand.RowDataPacket;
-                return brand;
-              });
-
-              brands.map((item) => {
-                let data = {
-                  _id: item.id,
-                  title: item.title
-                }
-                
-                Brand.findOne({ id: item.id }, function (err, br) {
-                  if (err) {
-                    console.error('Lỗi tìm kiếm người dùng:', err);
-                  } else {
-                    if (br) {
-                      console.log('Brand đã tồn tại');
-                    } else {
-                      Brand.insertMany(data)
-                    }
-                  }
-                });
-
-              })
-
-
-            });
-            await connection.query('SELECT * FROM luxubu.images JOIN luxubu.products  ON images.product_id = products.id', (error, results, fields) => {
-              if (error) throw error;
-
-              const products = {};
-
-              results.forEach(row => {
-                const { id, url, title, slug, description, price, category_id, brand_id, quantity, sold, public_id } = row;
-
-                if (!products[id]) {
-                  products[id] = {
-                    _id: id,
-                    title: title,
-                    slug: slug,
-                    description: description,
-                    price: price,
-                    category: category_id,
-                    brand: brand_id,
-                    quantity: quantity,
-                    sold: sold,
-                    images: []
+                  orders[row.id].products.push({
+                    product: row.productid,
+                    qty: row.quantity
+                  });
+                  orders[row.id].paymentIntent = {
+                    id: row.paymentid,
+                    name: row.method_name
                   };
-                }
-
-                products[id].images.push({
-                  public_id: public_id,
-                  url: url
                 });
+
+                const jsonResult = Object.values(orders);
+
+                jsonResult.map((item) => {
+
+                  Order.findOne({ id: item.id }, function (err, pr) {
+                    if (err) {
+                      console.error('Lỗi tìm kiếm người dùng:', err);
+                    } else {
+                      if (pr) {
+                        console.log('Order đã tồn tại');
+                      } else {
+                        Order.insertMany(item)
+                      }
+                    }
+                  });
+
+                })
               });
 
-              const jsonResult = Object.values(products);
-              console.log(jsonResult);
-              jsonResult.map((item) => {
+              await connection.query(`SELECT * FROM luxubu.reviews WHERE reviews.user_id in ('${arrUsers.join('\', \'')}')`,
+                (error, results, fields) => {
 
-                Product.findOne({ id: item.id }, function (err, pr) {
-                  if (err) {
-                    console.error('Lỗi tìm kiếm người dùng:', err);
-                  } else {
-                    if (pr) {
-                      console.log('Sản phẩm đã tồn tại');
-                    } else {
-                      Product.insertMany(item)
+                  const reviews = {};
+
+                  results?.forEach(row => {
+                    if (!reviews[row.id]) {
+                      reviews[row.id] = {
+                        _id: row.id,
+                        product: row.product_id,
+                        user: row.user_id,
+                        title: row.title,
+                        rating: row.rating,
+                        review: row.review,
+                        status: row.status,
+                      };
                     }
-                  }
+
+                  });
+
+                  const jsonResult = Object.values(reviews);
+
+                  jsonResult.map((item) => {
+
+                    Review.findOne({ id: item.id }, function (err, pr) {
+                      if (err) {
+                        console.error('Lỗi tìm kiếm người dùng:', err);
+                      } else {
+                        if (pr) {
+                          console.log('Review đã tồn tại');
+                        } else {
+                          Review.insertMany(item)
+                        }
+                      }
+                    });
+
+                  })
                 });
-
-              })
-
             });
-
-
-
-            res.json({ msg: "Phân tán thành công" })
 
           } else {
+            // Hiển thị table đang có 
             await connection.query(`SHOW COLUMNS FROM luxubu.provinces `, async (error, results) => {
               res.json({ msg: "Không tìm thấy miền này", columns: results })
             })

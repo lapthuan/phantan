@@ -3,6 +3,11 @@ const { CART_ITEM_STATUS } = require("../constants");
 // Declare the Schema of the Mongo model
 var orderSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+    },
     products: [
       {
         product: {

@@ -3,6 +3,11 @@ const { Schema } = Mongoose;
 
 // Contact Schema
 const ContactSchema = new Schema({
+  _id: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   name: {
     type: String,
     trim: true
@@ -11,6 +16,10 @@ const ContactSchema = new Schema({
     type: String
   },
   message: {
+    type: String,
+    trim: true
+  },
+  phone: {
     type: String,
     trim: true
   },
