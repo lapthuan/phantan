@@ -3,7 +3,7 @@ const express = require("express");
 const { notFound, errorHandler } = require("./middlewares/errorHandler");
 const app = express();
 const dotenv = require("dotenv").config();
-const PORT = 5000;
+const PORT = 4000;
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const cors = require("cors");
@@ -215,11 +215,11 @@ app.post("/api/distributed-mongodb", (req, res) => {
                   const jsonResult = Object.values(products);
 
                   jsonResult.map((item) => {
-
-                    Product.findOne({ id: item.id }, function (err, pr) {
+                    Product.findOne({ _id: item._id }, function (err, pr) {
                       if (err) {
                         console.error('Lỗi tìm kiếm người dùng:', err);
                       } else {
+
                         if (pr) {
                           console.log('Sản phẩm đã tồn tại');
                         } else {
@@ -353,7 +353,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                   isBlocked: item.isBlocked,
                 }
 
-                User.findOne({ email: item.email }, function (err, user) {
+                User.findOne({ _id: item.id }, function (err, user) {
                   if (err) {
                     console.error('Lỗi tìm kiếm người dùng:', err);
                   } else {
@@ -403,7 +403,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
                 jsonResult.map((item) => {
 
-                  Order.findOne({ id: item.id }, function (err, pr) {
+                  Order.findOne({ _id: item._id }, function (err, pr) {
                     if (err) {
                       console.error('Lỗi tìm kiếm người dùng:', err);
                     } else {
@@ -442,7 +442,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
                   jsonResult.map((item) => {
 
-                    Review.findOne({ id: item.id }, function (err, pr) {
+                    Review.findOne({ _id: item._id }, function (err, pr) {
                       if (err) {
                         console.error('Lỗi tìm kiếm người dùng:', err);
                       } else {
