@@ -19,7 +19,12 @@ const Product = require("./models/productModel");
 const User = require("./models/userModel");
 const Order = require("./models/orderModel");
 const Review = require("./models/review");
-const { db } = require("./config/firebaseConnect");
+const firebase = require("firebase");
+const dataProducts = require("./data");
+const asyncHandler = require("express-async-handler");
+require("firebase/storage");
+require("firebase/firestore");
+require("firebase/auth");
 const connection = mysql.createConnection({
   host: "localhost",
   user: "root",
@@ -83,7 +88,6 @@ app.get("/api/mysqldatabase", (req, res) => {
 });
 app.post("/api/connectmongodb", (req, res) => {
   const { url } = req.body;
-
   mongoose
     .connect(url)
     .then(() => {
@@ -103,7 +107,6 @@ app.post("/api/connectmongodb", (req, res) => {
       res.json({ Message: err });
     });
 });
-
 app.post("/api/distributed-mongodb", (req, res) => {
   const { ConnectMongodb, colums, value } = req.body;
   mongoose
@@ -176,7 +179,6 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         delete category.RowDataPacket;
                         return category;
                       });
-                      AddDataPhantan(categorys, dbName.categories);
                       categorys.map((item) => {
                         let data = {
                           _id: item.id,
@@ -204,7 +206,6 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         delete brand.RowDataPacket;
                         return brand;
                       });
-                      AddDataPhantan(brands, dbName.brands);
                       brands.map((item) => {
                         let data = {
                           _id: item.id,
@@ -305,6 +306,51 @@ app.post("/api/distributed-mongodb", (req, res) => {
       res.json({ message: "Không tim thấy kết nối" });
     });
 });
+
+app.post(
+  "/api/distributed-firebase",
+  asyncHandler(async (req, res, next) => {
+    const { config, value, columns } = req.body;
+    const data = [
+      {
+        id: "123",
+        firstname: "dung32",
+        lastname: "quocdung32",
+        email: "admin123@gmail.com",
+        mobile: "09188123123",
+        password:
+          "$2b$10$Wdx5gwr/MkjetlXyDYeHzuUvykSURyXX0E3WtYyIJR9poFUw.SlwK",
+        role: "admin",
+      },
+      {
+        id: "1234",
+        firstname: "dung32",
+        lastname: "quocdung32",
+        email: "admin123@gmail.com",
+        mobile: "09188123123",
+        password:
+          "$2b$10$Wdx5gwr/MkjetlXyDYeHzuUvykSURyXX0E3WtYyIJR9poFUw.SlwK",
+        role: "admin",
+      },
+    ];
+    if (!firebase.apps.length) {
+      await firebase.initializeApp(config);
+    }
+    const db = await firebase.firestore();
+    const isConnected = false;
+    try {
+      await db.enableNetwork();
+      isConnected = true;
+      AddDataPhantan(data, dbName.productsName, db);
+    } catch (error) {
+      console.error("Error connecting to Firebase:", error);
+    } finally {
+      if (isConnected) {
+        await db.disableNetwork();
+      }
+    }
+  })
+);
 
 app.use(notFound);
 app.use(errorHandler);
