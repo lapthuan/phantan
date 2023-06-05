@@ -368,8 +368,8 @@ app.post("/api/distributed-mongodb", (req, res) => {
 
               })
               await connection.query(`SELECT order.id , order.orderStatus,order.totalPrice,order.orderby,orderdetail.productid,orderdetail.quantity,order.paymentid,payments.method_name
-              FROM luxubu.orderdetail 
-              JOIN luxubu.order ON orderdetail.orderid = order.id 
+              FROM luxubu.order 
+              JOIN luxubu.orderdetail ON orderdetail.orderid = order.id 
               JOIN luxubu.users ON users.id = order.orderby 
               JOIN luxubu.payments ON payments.id = order.paymentid 
               JOIN luxubu.products ON products.id = orderdetail.productid 
@@ -402,7 +402,6 @@ app.post("/api/distributed-mongodb", (req, res) => {
                 const jsonResult = Object.values(orders);
 
                 jsonResult.map((item) => {
-
                   Order.findOne({ _id: item._id }, function (err, pr) {
                     if (err) {
                       console.error('Lỗi tìm kiếm người dùng:', err);
