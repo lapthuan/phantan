@@ -1,5 +1,3 @@
-const { db } = require("../config/firebaseConnect");
-const firebase = require("firebase");
 const AddDataPhantan = async (dulieu, collection, dconnect) => {
   try {
     if (Array.isArray(dulieu) && dulieu.length > 0) {

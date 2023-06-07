@@ -311,39 +311,20 @@ app.post(
   "/api/distributed-firebase",
   asyncHandler(async (req, res, next) => {
     const { config, value, columns } = req.body;
-    const data = [
-      {
-        id: "123",
-        firstname: "dung32",
-        lastname: "quocdung32",
-        email: "admin123@gmail.com",
-        mobile: "09188123123",
-        password:
-          "$2b$10$Wdx5gwr/MkjetlXyDYeHzuUvykSURyXX0E3WtYyIJR9poFUw.SlwK",
-        role: "admin",
-      },
-      {
-        id: "1234",
-        firstname: "dung32",
-        lastname: "quocdung32",
-        email: "admin123@gmail.com",
-        mobile: "09188123123",
-        password:
-          "$2b$10$Wdx5gwr/MkjetlXyDYeHzuUvykSURyXX0E3WtYyIJR9poFUw.SlwK",
-        role: "admin",
-      },
-    ];
-    if (!firebase.apps.length) {
-      await firebase.initializeApp(config);
-    }
-    const db = await firebase.firestore();
-    const isConnected = false;
+    let isConnected = false;
+    // Check connection
     try {
+      if (!firebase.apps.length) {
+        await firebase.initializeApp(config);
+      }
+      const db = await firebase.firestore();
       await db.enableNetwork();
       isConnected = true;
-      AddDataPhantan(data, dbName.productsName, db);
+      await AddDataPhantan(data, dbName.productsName, db);
+      res.status(200).json({ message: "Data added to Firestore successfully" });
     } catch (error) {
       console.error("Error connecting to Firebase:", error);
+      res.status(500).json({ error: "Failed to connect to Firebase" });
     } finally {
       if (isConnected) {
         await db.disableNetwork();
