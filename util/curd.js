@@ -18,9 +18,9 @@ const AddDataPhantan = async (value, columns, config) => {
       const batch = db.batch();
 
       value.forEach((doc) => {
-        const docRef = db.collection(columns).doc();
+        const docRef = db.collection(columns).doc(); //.doc(doc.id).set(doc)
         batch.set(docRef, doc);
-      });
+      }); 
 
       await batch.commit();
       console.log("Data added to Firestore successfully");

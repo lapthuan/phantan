@@ -84,16 +84,13 @@ app.get("/api/mysqldatabase", (req, res) => {
         name !== "mysql"
       );
     });
-
     res.json({ database: filteredArray });
-
     connection.end(); // Close the connection when finished
   });
 });
 
 app.post("/api/connectmongodb", (req, res) => {
   const { url } = req.body;
-
   mongoose
     .connect(url)
     .then(() => {
@@ -153,7 +150,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                               title: item.title,
                             };
                             Category.findOne(
-                              { id: item.id },
+                              { _id: item.id },
                               function (err, cate) {
                                 if (err) {
                                   console.error(
@@ -185,7 +182,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                               _id: item.id,
                               title: item.title,
                             };
-                            Brand.findOne({ id: item.id }, function (err, br) {
+                            Brand.findOne({ _id: item.id }, function (err, br) {
                               if (err) {
                                 console.error("Lỗi tìm kiếm người dùng:", err);
                               } else {
@@ -279,7 +276,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                             };
 
                             BlogCat.findOne(
-                              { id: item.id },
+                              { _id: item.id },
                               function (err, br) {
                                 if (err) {
                                   console.error(
@@ -316,7 +313,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                               images: JSON.parse(item.images),
                             };
 
-                            Blog.findOne({ id: item.id }, function (err, br) {
+                            Blog.findOne({ _id: item.id }, function (err, br) {
                               if (err) {
                                 console.error("Lỗi tìm kiếm người dùng:", err);
                               } else {
@@ -606,7 +603,6 @@ app.post(
                             sold,
                             public_id,
                           } = row;
-
                           if (!products[id]) {
                             products[id] = {
                               _id: id,
@@ -621,13 +617,11 @@ app.post(
                               images: [],
                             };
                           }
-
                           products[id].images.push({
                             public_id: public_id,
                             url: url,
                           });
                         });
-
                         const jsonResult = Object.values(products);
                         await AddDataPhantan(
                           jsonResult,
@@ -644,24 +638,12 @@ app.post(
                           delete cateblog.RowDataPacket;
                           return cateblog;
                         });
-
+                        AddDataPhantan(cateblogs, dbName.cateblogs, config);
                         cateblogs.map((item) => {
                           let data = {
                             _id: item.id,
                             title: item.name,
                           };
-
-                          BlogCat.findOne({ id: item.id }, function (err, br) {
-                            if (err) {
-                              console.error("Lỗi tìm kiếm người dùng:", err);
-                            } else {
-                              if (br) {
-                                console.log("BlogCategory đã tồn tại");
-                              } else {
-                                BlogCat.insertMany(data);
-                              }
-                            }
-                          });
                         });
                       }
                     );
@@ -673,7 +655,7 @@ app.post(
                           delete blog.RowDataPacket;
                           return blog;
                         });
-
+                        let arrnew = [];
                         blogs.map((item) => {
                           let data = {
                             _id: item.id,
@@ -682,19 +664,9 @@ app.post(
                             category: item.idcateblog,
                             images: JSON.parse(item.images),
                           };
-
-                          Blog.findOne({ id: item.id }, function (err, br) {
-                            if (err) {
-                              console.error("Lỗi tìm kiếm người dùng:", err);
-                            } else {
-                              if (br) {
-                                console.log("blog đã tồn tại");
-                              } else {
-                                Blog.insertMany(data);
-                              }
-                            }
-                          });
+                          arrnew.push(data);
                         });
+                        AddDataPhantan(blogs, dbName.blogs, config);
                       }
                     );
                     connection.query(
@@ -705,7 +677,7 @@ app.post(
                           delete contact.RowDataPacket;
                           return contact;
                         });
-
+                        AddDataPhantan(contacts, dbName.contacts, config);
                         contacts.map((item) => {
                           let data = {
                             _id: item.id,
@@ -714,22 +686,8 @@ app.post(
                             phone: item.phone,
                             message: item.message,
                           };
-
-                          contactModel.findOne(
-                            { _id: item.id },
-                            function (err, br) {
-                              if (err) {
-                                console.error("Lỗi tìm kiếm người dùng:", err);
-                              } else {
-                                if (br) {
-                                  console.log("contact đã tồn tại");
-                                } else {
-                                  contactModel.insertMany(data);
-                                }
-                              }
-                            }
-                          );
                         });
+                        console.log(contacts);
                       }
                     );
 
@@ -747,7 +705,6 @@ app.post(
                       delete user.RowDataPacket;
                       return user;
                     });
-
                     await users.map((item) => {
                       arrUsers.push(item.id);
                       let data = {
@@ -762,18 +719,7 @@ app.post(
                         role: item.role,
                         isBlocked: item.isBlocked,
                       };
-
-                      User.findOne({ _id: item.id }, function (err, user) {
-                        if (err) {
-                          console.error("Lỗi tìm kiếm người dùng:", err);
-                        } else {
-                          if (user) {
-                            console.log("Người dùng đã có");
-                          } else {
-                            User.insertMany(data);
-                          }
-                        }
-                      });
+                      AddDataPhantan(users, dbName.users, config);
                     });
                     await connection.query(
                       `SELECT order.id , order.orderStatus,order.totalPrice,order.orderby,orderdetail.productid,orderdetail.quantity,order.paymentid,payments.method_name
@@ -785,7 +731,6 @@ app.post(
               WHERE order.orderby in ('${arrUsers.join("', '")}')`,
                       (error, results, fields) => {
                         const orders = {};
-
                         results?.forEach((row) => {
                           if (!orders[row.id]) {
                             orders[row.id] = {
@@ -797,7 +742,6 @@ app.post(
                               orderby: row.orderby,
                             };
                           }
-
                           orders[row.id].products.push({
                             product: row.productid,
                             qty: row.quantity,
@@ -807,32 +751,16 @@ app.post(
                             name: row.method_name,
                           };
                         });
-
                         const jsonResult = Object.values(orders);
-
-                        jsonResult.map((item) => {
-                          Order.findOne({ _id: item._id }, function (err, pr) {
-                            if (err) {
-                              console.error("Lỗi tìm kiếm người dùng:", err);
-                            } else {
-                              if (pr) {
-                                console.log("Order đã tồn tại");
-                              } else {
-                                Order.insertMany(item);
-                              }
-                            }
-                          });
-                        });
+                        AddDataPhantan(jsonResult, dbName.orders, config);
                       }
                     );
-
                     await connection.query(
                       `SELECT * FROM luxubu.reviews WHERE reviews.user_id in ('${arrUsers.join(
                         "', '"
                       )}')`,
                       (error, results, fields) => {
                         const reviews = {};
-
                         results?.forEach((row) => {
                           if (!reviews[row.id]) {
                             reviews[row.id] = {
@@ -848,20 +776,7 @@ app.post(
                         });
 
                         const jsonResult = Object.values(reviews);
-
-                        jsonResult.map((item) => {
-                          Review.findOne({ _id: item._id }, function (err, pr) {
-                            if (err) {
-                              console.error("Lỗi tìm kiếm người dùng:", err);
-                            } else {
-                              if (pr) {
-                                console.log("Review đã tồn tại");
-                              } else {
-                                Review.insertMany(item);
-                              }
-                            }
-                          });
-                        });
+                        AddDataPhantan(jsonResult, dbName.reviews, config);
                       }
                     );
                   }
