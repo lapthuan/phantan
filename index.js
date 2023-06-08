@@ -185,7 +185,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                               _id: item.id,
                               title: item.title,
                             };
-                            Brand.findOne({ id: item.id }, function (err, br) {
+                            Brand.findOne({ _id: item.id }, function (err, br) {
                               if (err) {
                                 console.error("Lỗi tìm kiếm người dùng:", err);
                               } else {
@@ -316,7 +316,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                               images: JSON.parse(item.images),
                             };
 
-                            Blog.findOne({ id: item.id }, function (err, br) {
+                            Blog.findOne({ _id: item.id }, function (err, br) {
                               if (err) {
                                 console.error("Lỗi tìm kiếm người dùng:", err);
                               } else {
