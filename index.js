@@ -11,6 +11,7 @@ const session = require("express-session");
 const mysql = require("mysql");
 const { default: mongoose, Error } = require("mongoose");
 const fs = require("fs");
+const path = require('path');
 const Brand = require("./models/brandModel");
 const Category = require("./models/prodcategoryModel");
 const Product = require("./models/productModel");
@@ -24,6 +25,7 @@ const AddDataPhantan = require("./util/curd");
 const dataProducts = require("./data/data");
 const asyncHandler = require("express-async-handler");
 const firebase = require("firebase");
+const axios = require('axios');
 require("firebase/storage");
 require("firebase/firestore");
 require("firebase/auth");
@@ -43,7 +45,34 @@ connection.connect(function (err) {
 
 app.use(morgan("dev"));
 app.use(cors());
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
+//Mongodb
+app.get('/mongodb', (req, res) => {
+  axios.get(`${process.env.API_PHANTAN}/api/provinces`)
+    .then(function (response) {
+      const data = response.data;
+      res.render('mongodb', { data: data });
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.render('index', { data: [] }); // Trường hợp xử lý lỗi
+    }); // Hiển thị view có tên là "index"
+});
+
+//FireBase
+app.get('/firebase', (req, res) => {
+  axios.get(`${process.env.API_PHANTAN}/api/provinces`)
+    .then(function (response) {
+      const data = response.data;
+      res.render('firebase', { data: data });
+    })
+    .catch(function (error) {
+      console.log(error);
+      res.render('index', { data: [] }); // Trường hợp xử lý lỗi
+    }); // Hiển thị view có tên là "index"
+});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
@@ -64,7 +93,7 @@ app.get("/api/run", (req, res) => {
   S;
 });
 
-app.get("/api/mysqldatabase", (req, res) => {
+app.get("/api/provinces", (req, res) => {
   let data = [];
   connection.query("SELECT * FROM luxubu.provinces ", function (err, results) {
 
@@ -77,8 +106,6 @@ app.get("/api/mysqldatabase", (req, res) => {
 
   });
 });
-
-
 
 app.post("/api/connectmongodb", (req, res) => {
   const { url } = req.body;
@@ -124,7 +151,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                   setTimeout(() => {
                     if (arrUsers.length == 0) {
                       res.json({
-                        message: `Không có dữ liệu tỉnh này ${value}`,
+                        message: `Không có dữ liệu tỉnh này`,
                       });
                     } else {
                       connection.query(
@@ -358,7 +385,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                       );
 
                       res.json({
-                        message: `Phân tán thành công khu vực ${value}`,
+                        message: `Phân tán thành công khu vực`,
                       });
                     }
                   }, 4000);
@@ -508,7 +535,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                     `SHOW COLUMNS FROM luxubu.provinces `,
                     async (error, results) => {
                       res.json({
-                        msg: "Không tìm thấy miền này",
+                        message: "Không tìm thấy miền này",
                         columns: results,
                       });
                     }
@@ -534,6 +561,7 @@ app.post(
     await connection.query(
       `SHOW COLUMNS FROM luxubu.provinces LIKE '${colums}'`,
       async (error, results) => {
+        console.log(results);
         const columnExists = results.length > 0;
         //Kiểm tra có column đó không
         if (columnExists) {
@@ -547,7 +575,7 @@ app.post(
                 setTimeout(() => {
                   if (arrUsers.length == 0) {
                     res.json({
-                      message: `Không có dữ liệu tỉnh này ${value}`,
+                      message: `Không có dữ liệu tỉnh này`,
                     });
                   } else {
                     connection.query(
@@ -779,7 +807,7 @@ app.post(
                   `SHOW COLUMNS FROM luxubu.provinces `,
                   async (error, results) => {
                     res.json({
-                      msg: "Không tìm thấy miền này",
+                      message: "Không có tỉnh này",
                       columns: results,
                     });
                   }
@@ -795,7 +823,6 @@ app.post(
   })
 );
 
-app.use(notFound);
 app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server is running at PORT ${PORT}`);

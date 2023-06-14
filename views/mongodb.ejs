@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Trang chủ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        textarea {
+            width: 300px;
+            height: 80px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .container {
+            width: 400px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Phân tán dữ liệu Mongodb</h1>
+        <div>
+            <label for="ketnoi">Kết nối</label>
+            <textarea id="ketnoi" cols="20" rows="4" name="ketnoi"></textarea>
+        </div>
+
+        <div>
+            <label for="data">Vị từ</label>
+            <select id="data" name="data">
+                <% data.forEach(function(item) { %>
+                    <option value="<%= item.name %>">
+                        <%= item.name %>
+                    </option>
+                    <% }); %>
+            </select>
+        </div>
+        <div>
+            <button id="submitButton">Phân tán</button>
+        </div>
+    </div>
+    <script>
+        // JavaScript code
+        const submitButton = document.getElementById('submitButton');
+
+        submitButton.addEventListener('click', () => {
+            const ketnoiInput = document.getElementById('ketnoi').value;
+            const dataSelect = document.getElementById('data');
+            const selectedOption = dataSelect.options[dataSelect.selectedIndex];
+
+            const requestData = {
+                ConnectMongodb: ketnoiInput,
+                colums: "name",
+                value: selectedOption.value
+            };
+
+            fetch(`${process.env.API_PHANTAN}/api/distributed-mongodb`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    if (data.message == "Không tim thấy kết nối") {
+                        alert("Không tim thấy kết nối")
+                    } else if (data.message == "Không có dữ liệu tỉnh này") {
+                        alert("Không có dữ liệu tỉnh này")
+                    } else if (data.message == "Không có tỉnh này") {
+                        alert("Không có tỉnh này")
+                    } else
+                        alert("Phân tán thành công")
+
+                })
+                .catch(error => {
+                    alert("Lỗi")
+
+                    console.error(error);
+                });
+        });
+    </script>
+    </div>
+</body>
+
+</html>
