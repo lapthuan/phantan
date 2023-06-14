@@ -66,28 +66,19 @@ app.get("/api/run", (req, res) => {
 
 app.get("/api/mysqldatabase", (req, res) => {
   let data = [];
-  connection.query("SHOW DATABASES", function (err, results) {
-    if (err) {
-      console.error("Error retrieving databases:", err);
-      return;
-    }
-    console.log(results);
+  connection.query("SELECT * FROM luxubu.provinces ", function (err, results) {
 
-    const formattedArray = results.map((row) => ({ name: row.Database }));
-
-    const filteredArray = formattedArray.filter((item) => {
-      const name = item.name.toLowerCase();
-      return (
-        name !== "phpmyadmin" &&
-        name !== "information_schema" &&
-        name !== "performance_schema" &&
-        name !== "mysql"
-      );
+    const tinhs = results.map((tinhss) => {
+      const tinh = { ...tinhss };
+      delete tinh.RowDataPacket;
+      return tinh;
     });
-    res.json({ database: filteredArray });
-    connection.end(); // Close the connection when finished
+    res.json(tinhs);
+
   });
 });
+
+
 
 app.post("/api/connectmongodb", (req, res) => {
   const { url } = req.body;
@@ -538,7 +529,8 @@ app.post("/api/distributed-mongodb", (req, res) => {
 app.post(
   "/api/distributed-firebase",
   asyncHandler(async (req, res, next) => {
-    const { config, value, colums } = req.body;
+    const { configs, value, colums } = req.body;
+    const config = JSON.parse(configs)
     await connection.query(
       `SHOW COLUMNS FROM luxubu.provinces LIKE '${colums}'`,
       async (error, results) => {
