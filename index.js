@@ -49,6 +49,13 @@ app.use(cors());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
+//HomePage
+app.get('/', (req, res) => {
+
+  res.render('index');
+
+});
 //Mongodb
 app.get('/mongodb', (req, res) => {
   console.log(process.env.API_PHANTAN);
