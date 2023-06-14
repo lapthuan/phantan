@@ -31,9 +31,10 @@ require("firebase/firestore");
 require("firebase/auth");
 const dbName = require("./export");
 const connection = mysql.createConnection({
-  host: "localhost",
-  user: "root",
-  password: "",
+  host: "baz4n9jsazwull2hq07k-mysql.services.clever-cloud.com",
+  user: "uptpnxygmxqdjbdx",
+  password: "L7RGh4wuYai0WmFUz84f",
+  database: "baz4n9jsazwull2hq07k"
 });
 connection.connect(function (err) {
   if (err) {
@@ -96,7 +97,7 @@ app.get("/api/run", (req, res) => {
 
 app.get("/api/provinces", (req, res) => {
   let data = [];
-  connection.query("SELECT * FROM luxubu.provinces ", function (err, results) {
+  connection.query("SELECT * FROM provinces ", function (err, results) {
 
     const tinhs = results.map((tinhss) => {
       const tinh = { ...tinhss };
@@ -137,13 +138,13 @@ app.post("/api/distributed-mongodb", (req, res) => {
     .connect(ConnectMongodb)
     .then(async () => {
       await connection.query(
-        `SHOW COLUMNS FROM luxubu.provinces LIKE '${colums}'`,
+        `SHOW COLUMNS FROM provinces LIKE '${colums}'`,
         async (error, results) => {
           const columnExists = results.length > 0;
           //Kiểm tra có column đó không
           if (columnExists) {
             await connection.query(
-              `SELECT * FROM luxubu.provinces WHERE ${colums} like '%${value}'`,
+              `SELECT * FROM provinces WHERE ${colums} like '%${value}'`,
               async (err, results) => {
                 if (results.length != 0) {
                   console.log("ID tỉnh : " + results[0].id);
@@ -156,7 +157,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                       });
                     } else {
                       connection.query(
-                        `SELECT * FROM luxubu.categories `,
+                        `SELECT * FROM categories `,
                         (err, results) => {
                           const categorys = results.map((categoryData) => {
                             const category = { ...categoryData };
@@ -189,7 +190,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         }
                       );
                       connection.query(
-                        `SELECT * FROM luxubu.brands `,
+                        `SELECT * FROM brands `,
                         (err, results) => {
                           const brands = results.map((brandData) => {
                             const brand = { ...brandData };
@@ -216,7 +217,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         }
                       );
                       connection.query(
-                        "SELECT * FROM luxubu.images JOIN luxubu.products  ON images.product_id = products.id",
+                        "SELECT * FROM images JOIN products  ON images.product_id = products.id",
                         (error, results, fields) => {
                           if (error) throw error;
                           const products = {};
@@ -280,7 +281,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         }
                       );
                       connection.query(
-                        `SELECT * FROM luxubu.cateblog `,
+                        `SELECT * FROM cateblog `,
                         (err, results) => {
                           const cateblogs = results.map((cateblogsData) => {
                             const cateblog = { ...cateblogsData };
@@ -315,7 +316,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         }
                       );
                       connection.query(
-                        `SELECT * FROM luxubu.blog `,
+                        `SELECT * FROM blog `,
                         (err, results) => {
                           const blogs = results.map((blogsData) => {
                             const blog = { ...blogsData };
@@ -347,7 +348,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                         }
                       );
                       connection.query(
-                        `SELECT * FROM luxubu.contacts `,
+                        `SELECT * FROM contacts `,
                         (err, results) => {
                           const contacts = results.map((contactData) => {
                             const contact = { ...contactData };
@@ -392,7 +393,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                   }, 4000);
 
                   await connection.query(
-                    `SELECT * FROM luxubu.users WHERE idprovinces = ${results[0].id}`,
+                    `SELECT * FROM users WHERE idprovinces = ${results[0].id}`,
                     async (err, results1) => {
                       const users = results1.map((UserData) => {
                         const user = { ...UserData };
@@ -429,11 +430,11 @@ app.post("/api/distributed-mongodb", (req, res) => {
                       });
                       await connection.query(
                         `SELECT order.id , order.orderStatus,order.totalPrice,order.orderby,orderdetail.productid,orderdetail.quantity,order.paymentid,payments.method_name
-              FROM luxubu.order 
-              JOIN luxubu.orderdetail ON orderdetail.orderid = order.id 
-              JOIN luxubu.users ON users.id = order.orderby 
-              JOIN luxubu.payments ON payments.id = order.paymentid 
-              JOIN luxubu.products ON products.id = orderdetail.productid 
+              FROM order 
+              JOIN orderdetail ON orderdetail.orderid = order.id 
+              JOIN users ON users.id = order.orderby 
+              JOIN payments ON payments.id = order.paymentid 
+              JOIN products ON products.id = orderdetail.productid 
               WHERE order.orderby in ('${arrUsers.join("', '")}')`,
                         (error, results, fields) => {
                           const orders = {};
@@ -485,7 +486,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                       );
 
                       await connection.query(
-                        `SELECT * FROM luxubu.reviews WHERE reviews.user_id in ('${arrUsers.join(
+                        `SELECT * FROM reviews WHERE reviews.user_id in ('${arrUsers.join(
                           "', '"
                         )}')`,
                         (error, results, fields) => {
@@ -533,7 +534,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
                 } else {
                   // Hiển thị table đang có
                   await connection.query(
-                    `SHOW COLUMNS FROM luxubu.provinces `,
+                    `SHOW COLUMNS FROM provinces `,
                     async (error, results) => {
                       res.json({
                         message: "Không tìm thấy miền này",
@@ -560,14 +561,14 @@ app.post(
     const { configs, value, colums } = req.body;
     const config = JSON.parse(configs)
     await connection.query(
-      `SHOW COLUMNS FROM luxubu.provinces LIKE '${colums}'`,
+      `SHOW COLUMNS FROM provinces LIKE '${colums}'`,
       async (error, results) => {
         console.log(results);
         const columnExists = results.length > 0;
         //Kiểm tra có column đó không
         if (columnExists) {
           await connection.query(
-            `SELECT * FROM luxubu.provinces WHERE ${colums} like '%${value}'`,
+            `SELECT * FROM provinces WHERE ${colums} like '%${value}'`,
             async (err, results) => {
               if (results.length != 0) {
                 console.log("ID tỉnh : " + results[0].id);
@@ -580,7 +581,7 @@ app.post(
                     });
                   } else {
                     connection.query(
-                      `SELECT * FROM luxubu.categories `,
+                      `SELECT * FROM categories `,
                       async (err, results) => {
                         const categorys = results.map((categoryData) => {
                           const category = { ...categoryData };
@@ -595,7 +596,7 @@ app.post(
                       }
                     );
                     connection.query(
-                      `SELECT * FROM luxubu.brands `,
+                      `SELECT * FROM brands `,
                       async (err, results) => {
                         const brands = results.map((brandData) => {
                           const brand = { ...brandData };
@@ -606,7 +607,7 @@ app.post(
                       }
                     );
                     connection.query(
-                      "SELECT * FROM luxubu.images JOIN luxubu.products  ON images.product_id = products.id",
+                      "SELECT * FROM images JOIN products  ON images.product_id = products.id",
                       async (error, results, fields) => {
                         if (error) throw error;
                         const products = {};
@@ -652,7 +653,7 @@ app.post(
                       }
                     );
                     connection.query(
-                      `SELECT * FROM luxubu.cateblog `,
+                      `SELECT * FROM cateblog `,
                       (err, results) => {
                         const cateblogs = results.map((cateblogsData) => {
                           const cateblog = { ...cateblogsData };
@@ -669,7 +670,7 @@ app.post(
                       }
                     );
                     connection.query(
-                      `SELECT * FROM luxubu.blog `,
+                      `SELECT * FROM blog `,
                       (err, results) => {
                         const blogs = results.map((blogsData) => {
                           const blog = { ...blogsData };
@@ -691,7 +692,7 @@ app.post(
                       }
                     );
                     connection.query(
-                      `SELECT * FROM luxubu.contacts `,
+                      `SELECT * FROM contacts `,
                       (err, results) => {
                         const contacts = results.map((contactData) => {
                           const contact = { ...contactData };
@@ -719,7 +720,7 @@ app.post(
                 }, 4000);
 
                 await connection.query(
-                  `SELECT * FROM luxubu.users WHERE idprovinces = ${results[0].id}`,
+                  `SELECT * FROM users WHERE idprovinces = ${results[0].id}`,
                   async (err, results1) => {
                     const users = results1.map((UserData) => {
                       const user = { ...UserData };
@@ -744,11 +745,11 @@ app.post(
                     });
                     await connection.query(
                       `SELECT order.id , order.orderStatus,order.totalPrice,order.orderby,orderdetail.productid,orderdetail.quantity,order.paymentid,payments.method_name
-              FROM luxubu.order 
-              JOIN luxubu.orderdetail ON orderdetail.orderid = order.id 
-              JOIN luxubu.users ON users.id = order.orderby 
-              JOIN luxubu.payments ON payments.id = order.paymentid 
-              JOIN luxubu.products ON products.id = orderdetail.productid 
+              FROM order 
+              JOIN orderdetail ON orderdetail.orderid = order.id 
+              JOIN users ON users.id = order.orderby 
+              JOIN payments ON payments.id = order.paymentid 
+              JOIN products ON products.id = orderdetail.productid 
               WHERE order.orderby in ('${arrUsers.join("', '")}')`,
                       (error, results, fields) => {
                         const orders = {};
@@ -777,7 +778,7 @@ app.post(
                       }
                     );
                     await connection.query(
-                      `SELECT * FROM luxubu.reviews WHERE reviews.user_id in ('${arrUsers.join(
+                      `SELECT * FROM reviews WHERE reviews.user_id in ('${arrUsers.join(
                         "', '"
                       )}')`,
                       (error, results, fields) => {
@@ -805,7 +806,7 @@ app.post(
               } else {
                 // Hiển thị table đang có
                 await connection.query(
-                  `SHOW COLUMNS FROM luxubu.provinces `,
+                  `SHOW COLUMNS FROM provinces `,
                   async (error, results) => {
                     res.json({
                       message: "Không có tỉnh này",
