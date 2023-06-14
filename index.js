@@ -50,6 +50,7 @@ app.set('view engine', 'ejs');
 
 //Mongodb
 app.get('/mongodb', (req, res) => {
+  console.log(process.env.API_PHANTAN);
   axios.get(`${process.env.API_PHANTAN}/api/provinces`)
     .then(function (response) {
       const data = response.data;

@@ -95,8 +95,10 @@
                 colums: "name",
                 value: selectedOption.value
             };
+            var API_PHANTAN = '<%- process.env.API_PHANTAN %>';
+      
 
-            fetch(`${process.env.API_PHANTAN}/api/distributed-mongodb`, {
+            fetch(`${API_PHANTAN}/api/distributed-mongodb`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

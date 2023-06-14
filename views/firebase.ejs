@@ -95,8 +95,8 @@
                 colums: "name",
                 value: selectedOption.value
             };
-
-            fetch(`${process.env.API_PHANTAN}/api/distributed-firebase`, {
+            var API_PHANTAN = '<%- process.env.API_PHANTAN %>';
+            fetch(`${API_PHANTAN}/api/distributed-firebase`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
