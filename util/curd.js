@@ -18,7 +18,7 @@ const AddDataPhantan = async (value, columns, config) => {
       const batch = db.batch();
 
       value.forEach((doc) => {
-        const docRef = db.collection(columns).doc(doc.id); //.doc(doc.id).set(doc)
+        const docRef = db.collection(columns).doc(); //.doc(doc.id).set(doc)
         batch.set(docRef, doc);
       });
 
