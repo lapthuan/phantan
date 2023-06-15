@@ -63,10 +63,9 @@
     <div class="container">
         <h1>Phân tán dữ liệu FireBase</h1>
         <div>
-            <label for="ketnoi">Kết nối</label>
-            <textarea id="ketnoi" style="width: 600px; height: 170px;" name="ketnoi"></textarea>
+            <!-- <label for="ketnoi">Kết nối</label> -->
+            <!-- <textarea id="ketnoi" style="width: 600px; height: 170px;" name="ketnoi"></textarea> -->
         </div>
-
         <div>
             <label for="data">Vị từ</label>
             <select id="data" name="data">
@@ -82,14 +81,20 @@
         </div>
     </div>
     <script>
-        // JavaScript code
         const submitButton = document.getElementById('submitButton');
-
         submitButton.addEventListener('click', () => {
-            const ketnoiInput = document.getElementById('ketnoi').value;
+            // const ketnoiInput = document.getElementById('ketnoi').value;
+            const ketnoiInput = `{
+        "apiKey": "AIzaSyDiB3WHxKnIGK22R7rN1O8NDsyGSg2FXEg",
+        "authDomain": "phantan-9e83c.firebaseapp.com",
+        "projectId": "phantan-9e83c",
+        "storageBucket": "phantan-9e83c.appspot.com",
+        "messagingSenderId": "654603545032",
+        "appId": "1:654603545032:web:59c93defa296f3cda2f8fd",
+        "measurementId": "G-Q0KPQ1LMWB",
+        "databaseURL": "https://ecommerce-with-react-2ac06.firebaseio.com" }`
             const dataSelect = document.getElementById('data');
             const selectedOption = dataSelect.options[dataSelect.selectedIndex];
-
             const requestData = {
                 configs: ketnoiInput,
                 colums: "name",
@@ -105,7 +110,6 @@
             })
                 .then(response => response.json())
                 .then(data => {
-
                     console.log(data);
                     if (data.status == "fail") {
                         alert("Không tim thấy kết nối")
@@ -118,11 +122,9 @@
                         alert("Không có tỉnh này")
                     } else
                         alert("Phân tán thành công")
-
                 })
                 .catch(error => {
                     alert("Lỗi")
-
                     console.error(error);
                 });
         });
