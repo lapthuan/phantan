@@ -57,10 +57,12 @@
             margin: 0 auto;
         }
     </style>
+
 </head>
 
 <body>
     <div class="container">
+        <a href="/">Trang chủ</a>
         <h1>Phân tán dữ liệu Mongodb</h1>
         <!-- <div>
             <label for="ketnoi">Kết nối</label>
@@ -86,7 +88,7 @@
         submitButton.addEventListener('click', () => {
             // const ketnoiInput = document.getElementById('ketnoi').value;
             const ketnoiInput =
-                "mongodb+srv://quocdung:quocdung@ecom.stjgq5a.mongodb.net/thuongmai?retryWrites=true&w=majority"
+                "mongodb+srv://quocdung:quocdung@ecom.stjgq5a.mongodb.net/phantan_demo?retryWrites=true&w=majority"
             const dataSelect = document.getElementById('data');
             const selectedOption = dataSelect.options[dataSelect.selectedIndex];
             const requestData = {
