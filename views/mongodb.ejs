@@ -62,11 +62,10 @@
 <body>
     <div class="container">
         <h1>Phân tán dữ liệu Mongodb</h1>
-        <div>
+        <!-- <div>
             <label for="ketnoi">Kết nối</label>
             <textarea id="ketnoi" cols="20" rows="4" name="ketnoi"></textarea>
-        </div>
-
+        </div> -->
         <div>
             <label for="data">Vị từ</label>
             <select id="data" name="data">
@@ -84,20 +83,18 @@
     <script>
         // JavaScript code
         const submitButton = document.getElementById('submitButton');
-
         submitButton.addEventListener('click', () => {
-            const ketnoiInput = document.getElementById('ketnoi').value;
+            // const ketnoiInput = document.getElementById('ketnoi').value;
+            const ketnoiInput =
+                "mongodb+srv://quocdung:quocdung@ecom.stjgq5a.mongodb.net/thuongmai?retryWrites=true&w=majority"
             const dataSelect = document.getElementById('data');
             const selectedOption = dataSelect.options[dataSelect.selectedIndex];
-
             const requestData = {
                 ConnectMongodb: ketnoiInput,
                 colums: "name",
                 value: selectedOption.value
             };
             var API_PHANTAN = '<%- process.env.API_PHANTAN %>';
-      
-
             fetch(`${API_PHANTAN}/api/distributed-mongodb`, {
                 method: 'POST',
                 headers: {
