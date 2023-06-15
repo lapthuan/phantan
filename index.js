@@ -562,17 +562,7 @@ app.post("/api/distributed-mongodb", (req, res) => {
 app.post(
   "/api/distributed-firebase",
   asyncHandler(async (req, res, next) => {
-    const { value, colums } = req.body;
-    const configs = {
-      apiKey: "AIzaSyDiB3WHxKnIGK22R7rN1O8NDsyGSg2FXEg",
-      authDomain: "phantan-9e83c.firebaseapp.com",
-      projectId: "phantan-9e83c",
-      storageBucket: "phantan-9e83c.appspot.com",
-      messagingSenderId: "654603545032",
-      appId: "1:654603545032:web:59c93defa296f3cda2f8fd",
-      measurementId: "G-Q0KPQ1LMWB",
-      databaseURL: "https://ecommerce-with-react-2ac06.firebaseio.com",
-    };
+    const { configs, value, colums } = req.body;
     const config = JSON.parse(configs);
     await connection.query(
       `SHOW COLUMNS FROM provinces LIKE '${colums}'`,
