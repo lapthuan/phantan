@@ -11,7 +11,7 @@ const session = require("express-session");
 const mysql = require("mysql");
 const { default: mongoose, Error } = require("mongoose");
 const fs = require("fs");
-const path = require('path');
+const path = require("path");
 const Brand = require("./models/brandModel");
 const Category = require("./models/prodcategoryModel");
 const Product = require("./models/productModel");
@@ -25,7 +25,7 @@ const AddDataPhantan = require("./util/curd");
 const dataProducts = require("./data/data");
 const asyncHandler = require("express-async-handler");
 const firebase = require("firebase");
-const axios = require('axios');
+const axios = require("axios");
 require("firebase/storage");
 require("firebase/firestore");
 require("firebase/auth");
@@ -34,7 +34,7 @@ const connection = mysql.createConnection({
   host: "baz4n9jsazwull2hq07k-mysql.services.clever-cloud.com",
   user: "uptpnxygmxqdjbdx",
   password: "L7RGh4wuYai0WmFUz84f",
-  database: "baz4n9jsazwull2hq07k"
+  database: "baz4n9jsazwull2hq07k",
 });
 connection.connect(function (err) {
   if (err) {
@@ -46,40 +46,39 @@ connection.connect(function (err) {
 
 app.use(morgan("dev"));
 app.use(cors());
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
 
 //HomePage
-app.get('/', (req, res) => {
-
-  res.render('index');
-
+app.get("/", (req, res) => {
+  res.render("index");
 });
 //Mongodb
-app.get('/mongodb', (req, res) => {
+app.get("/mongodb", (req, res) => {
   console.log(process.env.API_PHANTAN);
-  axios.get(`${process.env.API_PHANTAN}/api/provinces`)
+  axios
+    .get(`${process.env.API_PHANTAN}/api/provinces`)
     .then(function (response) {
       const data = response.data;
-      res.render('mongodb', { data: data });
+      res.render("mongodb", { data: data });
     })
     .catch(function (error) {
       console.log(error);
-      res.render('index', { data: [] }); // Trường hợp xử lý lỗi
+      res.render("index", { data: [] }); // Trường hợp xử lý lỗi
     }); // Hiển thị view có tên là "index"
 });
 
 //FireBase
-app.get('/firebase', (req, res) => {
-  axios.get(`${process.env.API_PHANTAN}/api/provinces`)
+app.get("/firebase", (req, res) => {
+  axios
+    .get(`${process.env.API_PHANTAN}/api/provinces`)
     .then(function (response) {
       const data = response.data;
-      res.render('firebase', { data: data });
+      res.render("firebase", { data: data });
     })
     .catch(function (error) {
       console.log(error);
-      res.render('index', { data: [] }); // Trường hợp xử lý lỗi
+      res.render("index", { data: [] }); // Trường hợp xử lý lỗi
     }); // Hiển thị view có tên là "index"
 });
 app.use(bodyParser.json());
@@ -105,14 +104,12 @@ app.get("/api/run", (req, res) => {
 app.get("/api/provinces", (req, res) => {
   let data = [];
   connection.query("SELECT * FROM provinces ", function (err, results) {
-
     const tinhs = results.map((tinhss) => {
       const tinh = { ...tinhss };
       delete tinh.RowDataPacket;
       return tinh;
     });
     res.json(tinhs);
-
   });
 });
 
@@ -565,14 +562,23 @@ app.post("/api/distributed-mongodb", (req, res) => {
 app.post(
   "/api/distributed-firebase",
   asyncHandler(async (req, res, next) => {
-    const { configs, value, colums } = req.body;
-    const config = JSON.parse(configs)
+    const { value, colums } = req.body;
+    const configs = {
+      apiKey: "AIzaSyDiB3WHxKnIGK22R7rN1O8NDsyGSg2FXEg",
+      authDomain: "phantan-9e83c.firebaseapp.com",
+      projectId: "phantan-9e83c",
+      storageBucket: "phantan-9e83c.appspot.com",
+      messagingSenderId: "654603545032",
+      appId: "1:654603545032:web:59c93defa296f3cda2f8fd",
+      measurementId: "G-Q0KPQ1LMWB",
+      databaseURL: "https://ecommerce-with-react-2ac06.firebaseio.com",
+    };
+    const config = JSON.parse(configs);
     await connection.query(
       `SHOW COLUMNS FROM provinces LIKE '${colums}'`,
       async (error, results) => {
         console.log(results);
         const columnExists = results.length > 0;
-        //Kiểm tra có column đó không
         if (columnExists) {
           await connection.query(
             `SELECT * FROM provinces WHERE ${colums} like '%${value}'`,
@@ -580,7 +586,6 @@ app.post(
               if (results.length != 0) {
                 console.log("ID tỉnh : " + results[0].id);
                 let arrUsers = [];
-                // Để kiểm tra có dữ liệu tỉnh đó không trước khi thêm dữ liệu
                 setTimeout(() => {
                   if (arrUsers.length == 0) {
                     res.json({
@@ -676,28 +681,25 @@ app.post(
                         });
                       }
                     );
-                    connection.query(
-                      `SELECT * FROM blog `,
-                      (err, results) => {
-                        const blogs = results.map((blogsData) => {
-                          const blog = { ...blogsData };
-                          delete blog.RowDataPacket;
-                          return blog;
-                        });
-                        let arrnew = [];
-                        blogs.map((item) => {
-                          let data = {
-                            _id: item.id,
-                            title: item.title,
-                            description: item.description,
-                            category: item.idcateblog,
-                            images: JSON.parse(item.images),
-                          };
-                          arrnew.push(data);
-                        });
-                        AddDataPhantan(blogs, dbName.blogs, config);
-                      }
-                    );
+                    connection.query(`SELECT * FROM blog `, (err, results) => {
+                      const blogs = results.map((blogsData) => {
+                        const blog = { ...blogsData };
+                        delete blog.RowDataPacket;
+                        return blog;
+                      });
+                      let arrnew = [];
+                      blogs.map((item) => {
+                        let data = {
+                          _id: item.id,
+                          title: item.title,
+                          description: item.description,
+                          category: item.idcateblog,
+                          images: JSON.parse(item.images),
+                        };
+                        arrnew.push(data);
+                      });
+                      AddDataPhantan(blogs, dbName.blogs, config);
+                    });
                     connection.query(
                       `SELECT * FROM contacts `,
                       (err, results) => {
